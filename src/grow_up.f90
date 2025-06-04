@@ -1,119 +1,85 @@
 !======================================================================!
 subroutine grow_up
 !----------------------------------------------------------------------!
+! Advance individual tree dimensions by dt.
+! Inputs:
+! Cup (kg[C] ind=1 s-1)
+!----------------------------------------------------------------------!
 use params
 use vars
 !----------------------------------------------------------------------!
 implicit none
-!----------------------------------------------------------------------!
-
-!----------------------------------------------------------------------!
-! Initial total C in individual                            (kg[C] ind-1)
-!----------------------------------------------------------------------!
-C0 = CDM * (Mfol + Ma + Mb + Mfro) + fCsucrose * Su + fCStarch * St
-!----------------------------------------------------------------------!
-! Save initial quantities.
-!----------------------------------------------------------------------!
-rb0 = rb
-Su0 = Su
-St0 = St
-Mfol0 = Mfol
-Ma0 = Ma
-Mb0 = Mb
-Mfro0 = Mfro
-Mtot0 = Mfol + Ma + Mb + Mfro
-!----------------------------------------------------------------------!
-! Basal C balance decays towards 0 ()
-!----------------------------------------------------------------------!
-An_base = An_base - dt * An_base / tau_Anbase
-!----------------------------------------------------------------------!
-! Percentage loss of conductivity decays towards 0                   (%)
-!----------------------------------------------------------------------!
-PLC = PLC - dt * PLC / tau_PLC
-!----------------------------------------------------------------------!
-! Gross photosynthesis                           (kg[C] m[ground]-2 s-1)
-!----------------------------------------------------------------------!
-Ag_crown_C = 1.0e-3 * MC * Ag_crown_mol
-!----------------------------------------------------------------------!
-! Net photosynthesis                             (kg[C] m[ground]-2 s-1)
-!----------------------------------------------------------------------!
-An_crown_C = 1.0e-3 * MC * An_crown_mol
-!----------------------------------------------------------------------!
-! Foliage respiration                            (kg[C] m[ground]-2 s-1)
-!----------------------------------------------------------------------!
-Rd_crown_C = Ag_crown_C - An_crown_C
-!----------------------------------------------------------------------!
-! Gross C uptake by crown                              (kg[C] ind-1 s-1)
-!----------------------------------------------------------------------!
-Cup = CPA * Ag_crown_C
-!----------------------------------------------------------------------!
-! Crown height effect on basal radial growth (fraction)
-!----------------------------------------------------------------------!
-fIAA = one - ht / 100.0
-fIAA = max (zero, fIAA)
-fIAA = min (one , fIAA)
-!----------------------------------------------------------------------!
-! Rate of change of basal radius                                 (m s-1)
-!----------------------------------------------------------------------!
-drb = fW_gr * fT_gr * fIAA * fa_Su * drb_base
-!----------------------------------------------------------------------!
-! Rate of change of rooting depth                                (m s-1)
-!----------------------------------------------------------------------!
-ddp = fW_gr * fT_gr *        fa_Su * ddp_base
-!----------------------------------------------------------------------!
-! Rate of change of height                                       (m s-1)
-!----------------------------------------------------------------------!
-dht = fW_gr * fT_gr * fIAA * fa_Su * dht_base
-!----------------------------------------------------------------------!
-! Basal heartwood area                                              (m2)
+real :: dMfol_max, drb_max, dht_max, dMfro_max
+real :: dMa_dht, dMa_drb
+real :: dMa_max, ddp_max, dMb_ddp, dMb_drb, dMb_max
+real :: Chia, Chib, fr, GMfol_max
 !----------------------------------------------------------------------!
 Ahw = pi * rb_hw ** 2
-!----------------------------------------------------------------------!
-! Basal stem area                                                   (m2)
-!----------------------------------------------------------------------!
-Astem = pi * rb0 ** 2
-!----------------------------------------------------------------------!
-! Basal sapwood area                                                (m2)
-!----------------------------------------------------------------------!
+Astem = pi * rb ** 2
 Asw = Astem - Ahw
 !----------------------------------------------------------------------!
-! Potential amount of additional foliage mass             (kg[DM] ind-1)
+Chia = one + alpha_ag + alpha_ag ** 2
+Chib = one + alpha_bg + alpha_bg ** 2
 !----------------------------------------------------------------------!
-GMfol_lim = lasa * Asw / sla - Mfol0
+! Litter fluxes from each compartment.
 !----------------------------------------------------------------------!
-! If sapwood area allows, grow foliage                      (kg[DM] s-1)
+LMfol = Mfol / tau_fol
+LMa = Ma / tau_w
+LMb = Mb / tau_w
+LMfro = Mfro / tau_w
 !----------------------------------------------------------------------!
-if (GMfol_lim > zero) then
-  GMfol = fW_gr * fT_gr * dMfol_base * Asw
-  GMfol = min (GMfol, (GMfol_lim - Mfol0) / dt)
-else
-  GMfol = zero
-end if
+! Remove litter from each compartment
 !----------------------------------------------------------------------!
-! Foliage litter flux                                 (kg[DM] ind-1 s-1)
+!Mfol = Mfol - dt * LMfol
+!Ma   = Ma   - dt * LMa
+!Mb   = Mb   - dt * Lmb
+!Mfro = Mfro - dt * LMfro
 !----------------------------------------------------------------------!
-LMfol = Mfol0 / tau_fol
+! Rates of growth for each compartment at current size ()
+! Ignore fIAA for now. maths of dht and drb together OK?
 !----------------------------------------------------------------------!
-! Rate of change of foliage mass                      (kg[DM] ind-1 s-1)
+GMfol_max = (lasa * Asw / sla - Mfol) / dt + LMfol
+GMfol = fW_gr * fT_gr * fa_Su * dMfol_base * Asw
+GMfol = min (GMfol, GMfol_max)
+GMfol = max (zero, GMfol)
+drb   = fW_gr * fT_gr * fa_Su * drb_base
+dht   = fW_gr * fT_gr * fa_Su * dht_base
+dMa_dht = rho_wood * (pi / 3.0) * (rb ** 2) * Chia
+dMa_drb = 2.0 * rho_wood * (pi / 3.0) * ht * rb * Chia
+GMa = dMa_dht * dht + dMa_drb * drb
+ddp = fW_gr * fT_gr * fa_Su * ddp_base
+dMb_ddp = rho_wood * (pi / 3.0) * (rb ** 2) * Chib
+dMb_drb = 2.0 * rho_wood * (pi / 3.0) * dp * rb * Chib
+GMb = dMb_ddp * ddp + dMb_drb * drb
+GMfro = fW_gr * fT_gr * fa_Su * dMfro_base * Asw
+!----------------------------------------------------------------------!
+! Rate of change of each compartment ()
 !----------------------------------------------------------------------!
 dMfol = GMfol - LMfol
+dMa = GMa - LMa
+dMb = GMb - LMb
+dMfro = GMfro - LMfro
 !----------------------------------------------------------------------!
-! Increment foliage mass                                  (kg[DM] ind-1)
+! Increment compartment masses ()
 !----------------------------------------------------------------------!
 Mfol = Mfol + dt * dMfol
+Ma = Ma + dt * dMa
+Mb = Mb + dt * dMb
+Mfro = Mfro + dt * dMfro
 !----------------------------------------------------------------------!
-! Increment height                                                   (m)
-!----------------------------------------------------------------------!
-ht = ht + dt * dht
-!----------------------------------------------------------------------!
-! Increment basal radius                                             (m)
-!----------------------------------------------------------------------!
-rb = rb + dt * drb
-!----------------------------------------------------------------------!
-!write (*,*) float (syr) * Cup / CPA, float (syr) * drb, &
-!            float (syr) * ddp, float (syr) * dht
-!----------------------------------------------------------------------!
-
+if (dMa > zero) then
+  ! Basal radius and height increases due to non-infill growth ()
+  fr = (dMa_drb * drb) / GMa
+  drb = (fr * dMa) / dMa_drb
+  rb = rb + dt * drb
+  dht = ((1.0 - fr) * dMa) / dMa_dht
+  ht = ht + dt * dht
+else
+  ! Above-ground woody mass shrinking. So, keep rb but reduce ht
+  ht = Ma / (rho_wood * (pi / 3.0) * (rb ** 2) * Chia)
+endif
+! At this rb determine dp.
+dp = Mb / (rho_wood * (pi / 3.0) * (rb ** 2) * Chib)
 !----------------------------------------------------------------------!
 end subroutine grow_up
 !======================================================================!
