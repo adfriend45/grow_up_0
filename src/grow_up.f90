@@ -12,8 +12,9 @@ implicit none
 real :: dMfol_max, drb_max, dht_max, dMfro_max
 real :: dMa_dht, dMa_drb
 real :: dMa_max, ddp_max, dMb_ddp, dMb_drb, dMb_max
-real :: Chia, Chib, fr, GMfol_max
+real :: fr, GMfol_max, M0, GMfro_max
 !----------------------------------------------------------------------!
+M0 = Ma
 Ahw = pi * rb_hw ** 2
 Astem = pi * rb ** 2
 Asw = Astem - Ahw
@@ -26,7 +27,7 @@ Chib = one + alpha_bg + alpha_bg ** 2
 LMfol = Mfol / tau_fol
 LMa = Ma / tau_w
 LMb = Mb / tau_w
-LMfro = Mfro / tau_w
+LMfro = Mfro / tau_fro
 !----------------------------------------------------------------------!
 ! Remove litter from each compartment
 !----------------------------------------------------------------------!
@@ -48,10 +49,14 @@ dMa_dht = rho_wood * (pi / 3.0) * (rb ** 2) * Chia
 dMa_drb = 2.0 * rho_wood * (pi / 3.0) * ht * rb * Chia
 GMa = dMa_dht * dht + dMa_drb * drb
 ddp = fW_gr * fT_gr * fa_Su * ddp_base
+!if (dp > 1.5) ddp = 0.0 !****adf
 dMb_ddp = rho_wood * (pi / 3.0) * (rb ** 2) * Chib
 dMb_drb = 2.0 * rho_wood * (pi / 3.0) * dp * rb * Chib
 GMb = dMb_ddp * ddp + dMb_drb * drb
+GMfro_max = (frasa * Asw / sfra - Mfro) / dt + LMfro
 GMfro = fW_gr * fT_gr * fa_Su * dMfro_base * Asw
+GMfro = min (GMfro, GMfro_max)
+GMfro = max (zero, GMfro)
 !----------------------------------------------------------------------!
 ! Rate of change of each compartment ()
 !----------------------------------------------------------------------!
@@ -64,6 +69,7 @@ dMfro = GMfro - LMfro
 !----------------------------------------------------------------------!
 Mfol = Mfol + dt * dMfol
 Ma = Ma + dt * dMa
+!write (*,*) Ma-M0,dt*dMa
 Mb = Mb + dt * dMb
 Mfro = Mfro + dt * dMfro
 !----------------------------------------------------------------------!
@@ -78,8 +84,11 @@ else
   ! Above-ground woody mass shrinking. So, keep rb but reduce ht
   ht = Ma / (rho_wood * (pi / 3.0) * (rb ** 2) * Chia)
 endif
-! At this rb determine dp.
+! At this rb determine dp from Mb.
 dp = Mb / (rho_wood * (pi / 3.0) * (rb ** 2) * Chib)
+!write (*,*) Ma-M0,dt*dMa,fr
+!write (*,*) Ma,Mb, dp
+!if (it == 20) stop
 !----------------------------------------------------------------------!
 end subroutine grow_up
 !======================================================================!

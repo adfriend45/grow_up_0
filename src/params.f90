@@ -5,7 +5,7 @@ implicit none
 !----------------------------------------------------------------------!
 ! Number of years in simulation (yr)
 !----------------------------------------------------------------------!
-integer, parameter :: nyr = 10
+integer, parameter :: nyr = 40
 !----------------------------------------------------------------------!
 ! Number of model timsteps in year                                   (n)
 !----------------------------------------------------------------------!
@@ -54,7 +54,7 @@ real, parameter :: fCStarch  = 72.1 / 162.1
 !----------------------------------------------------------------------!
 ! Wood density. From Nogueira et al., 2005.                  (kg[DM]/m3)
 !----------------------------------------------------------------------!
-real, parameter :: rho_wood   = 675.0
+real, parameter :: rho_wood = 675.0
 !----------------------------------------------------------------------!
 ! Initial ratio of height to rb                                    (m/m)
 !----------------------------------------------------------------------!
@@ -141,7 +141,7 @@ real, parameter :: dht_base = (2.0 * 43.0 / 240.0) / float (syr)
 ! Default rate under ideal conditions will be 50% of this due to the
 ! sucrose effect. Complete guess
 !----------------------------------------------------------------------!
-real, parameter :: ddp_base = dht_base !****adf / 10.0
+real, parameter :: ddp_base = dht_base / 10.0
 !----------------------------------------------------------------------!
 ! Maximum foliage growth rate calibrated to grow full crown in about
 ! 10 days                                      (kg[DM] m[sapwood]-2 s-1)
