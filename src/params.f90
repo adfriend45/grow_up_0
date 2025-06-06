@@ -72,6 +72,11 @@ real, parameter :: alpha_ag = 0.54
 !----------------------------------------------------------------------!
 real, parameter :: alpha_bg = 1.62
 !----------------------------------------------------------------------!
+! Parameters to compute mass from radius and height                  (-)
+!----------------------------------------------------------------------!
+real, parameter :: Chia = one + alpha_ag + alpha_ag ** 2
+real, parameter :: Chib = one + alpha_bg + alpha_bg ** 2
+!----------------------------------------------------------------------!
 ! Coefficient a_p for CPA from rb. From Pretzsch 2015 (Table 3).   ()
 !----------------------------------------------------------------------!
 real, parameter :: a_p = -0.8683
@@ -166,6 +171,25 @@ real, parameter :: tau_fro = 1.56 * float (syr)
 ! Where from?
 !----------------------------------------------------------------------!
 real, parameter :: tau_w = 180.0 * float (syr)
+!----------------------------------------------------------------------!
+! Growth yield. From Cannell and Thornley (2000)           (g[C] g[C]-1)
+!----------------------------------------------------------------------!
+real, parameter :: YG = 0.8
+!----------------------------------------------------------------------!
+! Maintenance respiration constant at 20oC           (kg[C] kg[N]-1 s-1)
+! From Cannell and Thornley (2000) for EFM.
+!----------------------------------------------------------------------!
+real, parameter :: kmmax = 0.1 / float (sday)
+!----------------------------------------------------------------------!
+! Michaelis-Menten constant for residual respiration        (g[C] g[DM])
+! From Cannell and Thornley (2000) for EFM.
+!----------------------------------------------------------------------!
+real, parameter :: Km_R = 0.05
+!----------------------------------------------------------------------!
+! Fraction of stem biomass that is N                          (fraction)
+! Taken from Collelongo, Scarascia et al. (2000).
+!----------------------------------------------------------------------!
+real, parameter :: fNstm = 0.67 / 1000.0
 !----------------------------------------------------------------------!
 end module params
 !======================================================================!
