@@ -186,10 +186,28 @@ real, parameter :: kmmax = 0.1 / float (sday)
 !----------------------------------------------------------------------!
 real, parameter :: Km_R = 0.05
 !----------------------------------------------------------------------!
-! Fraction of stem biomass that is N                          (fraction)
+! Fraction of compartment biomass that is N                   (fraction)
 ! Taken from Collelongo, Scarascia et al. (2000).
 !----------------------------------------------------------------------!
-real, parameter :: fNstm = 0.67 / 1000.0
+real, parameter :: fNfol = 24.22 / 1000.0
+real, parameter :: fNstm = (1.29+0.67) / 2000.0 ! mean branches+stem
+real, parameter :: fNcro = 0.04 / 1000.0
+real, parameter :: fNfro = 4.42 / 1000.0
+!----------------------------------------------------------------------!
+! Q10 for respiration                                           (scalar)
+! From Crous et al. (2022) this should not be a constant.
+!----------------------------------------------------------------------!
+real, parameter :: Q10_R = 2.0
+!----------------------------------------------------------------------!
+! Respiration associated with phloem loading constant      (g[C] d[C]-1)
+! Taken from Cannell and Thornley (2000).
+!----------------------------------------------------------------------!
+real, parameter :: cphloem = 0.06
+!----------------------------------------------------------------------!
+! Coefficient for starch synthesis                 (kg[St] kg[DM]-1 s-1)
+! Where from?
+!----------------------------------------------------------------------!
+real, parameter :: alpha_St = 2.3e-8
 !----------------------------------------------------------------------!
 end module params
 !======================================================================!

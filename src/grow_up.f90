@@ -28,6 +28,12 @@ fIAA = one - ht / 100.0
 fIAA = max (zero, fIAA)
 fIAA = min (one , fIAA)
 !----------------------------------------------------------------------!
+! Residual respiration. Approach from Thornley and Cannell (2000),
+! Eqn. (17), with temperature effect from .                                           (kg[C] ind-1 s-1)
+!----------------------------------------------------------------------!
+Rresidual = fT_R * kmmax * (fSu / (Km_R + fSu)) * &
+           (fNfol * Mfol + fNstm * Ma_sw + fNcro * Mb_sw + fNfro * Mfro)
+!----------------------------------------------------------------------!
 ! Litter fluxes from each compartment                 (kg[DM] ind-1 s-1)
 !----------------------------------------------------------------------!
 LMfol = Mfol / tau_fol
@@ -46,6 +52,14 @@ Mtot = Mfol + Ma + Mb + Mfro
 ! Sucrose litter flux                                 (kg[Su] ind-1 s-1)
 !----------------------------------------------------------------------!
 LSu = Su * LMtot / (Mtot + eps)
+!----------------------------------------------------------------------!
+! Starch litter flux                                  (kg[St] ind-1 s-1)
+!----------------------------------------------------------------------!
+LSt = St * LMtot / (Mtot + eps)
+!----------------------------------------------------------------------!
+! Rate of growth of starch pool                       (kg[St] ind-1 s-1)
+!----------------------------------------------------------------------!
+GSt = alpha_St * Mtot_nhw * (fa_Su * fi_St - fi_Su * fa_St)
 !----------------------------------------------------------------------!
 ! Rates of growth for each compartment at current size ()
 ! Ignore fIAA for now. maths of dht and drb together OK?
@@ -149,19 +163,20 @@ PLC = PLC - dt * PLC / tau_PLC
 !----------------------------------------------------------------------!
 Gtot = GMfol + GMa + GMb + GMfro
 !----------------------------------------------------------------------!
-! Residual respiration. Approach from Thornley and Cannell (2000),
-! Eqn. (17).                                           (kg[C] ind-1 s-1)
-!----------------------------------------------------------------------!
-Rresidual = kmmax * (fSu / (Km_R + fSu)) * (fNstm * Ma_sw)
-!----------------------------------------------------------------------!
 ! Growth respiration. From Cannell and Thornley (2000) (kg[C] ind-1 s-1)
 !----------------------------------------------------------------------!
 Rgrowth = CDM * Gtot * (one - YG) / YG
 !----------------------------------------------------------------------!
+! Respiration associated with phloem loading           (kg[C] ind-1 s-1)
+! Taken form Cannell and Thornley (2000), Eqn. (11)
+! N.B. need to make foliage resp. consistent.
+!----------------------------------------------------------------------!
+Rphloem = cphloem * (Cup - Rfol)
+!----------------------------------------------------------------------!
 ! Total respiration. Approach from Thornley and Cannell (2000),
 ! Eqn. (17).                                           (kg[C] ind-1 s-1)
 !----------------------------------------------------------------------!
-Rtot = Rresidual + Rgrowth
+Rtot = Rphloem + Rresidual + Rgrowth
 !----------------------------------------------------------------------!
 ! Sucrose mass derivatve                              (kg[Su] ind-1 s-1)
 !----------------------------------------------------------------------!
