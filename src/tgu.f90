@@ -101,10 +101,23 @@ do kyr = 1, nyr
     !------------------------------------------------------------------!
     fSu = Su / (Mtot_nhw + eps)
     !------------------------------------------------------------------!
-    ! Hill activation and inhibition functions                  (scalar)
+    ! Hill activation and inhibition sucrose functions          (scalar)
     !------------------------------------------------------------------!
-    fa_Su = (fSu ** n_Hill) / ((KSu ** n_Hill) + (fSu ** n_Hill))
-    fi_Su = (KSu ** n_Hill) / ((fSu ** n_Hill) + (KSu ** n_Hill))
+    fa_Su = (fSu ** n_Hill_Su) / &
+            ((KSu ** n_Hill_Su) + (fSu ** n_Hill_Su))
+    fi_Su = (KSu ** n_Hill_Su) / &
+            ((fSu ** n_Hill_Su) + (KSu ** n_Hill_Su))
+    !------------------------------------------------------------------!
+    ! Starch fraction of non-heartwood biomass                (fraction)
+    !------------------------------------------------------------------!
+    fSt = St / (Mtot_nhw + eps)
+    !------------------------------------------------------------------!
+    ! Hill activation and inhibition starch functions           (scalar)
+    !------------------------------------------------------------------!
+    fa_St = (fSt ** n_Hill_St) / &
+            ((KSt ** n_Hill_St) + (fSt ** n_Hill_St))
+    fi_St = (KSt ** n_Hill_St) / &
+            ((fSt ** n_Hill_St) + (KSt ** n_Hill_St))
     !------------------------------------------------------------------!
     ! Gross C uptake                                   (kg[C] ind-1 s-1)
     !------------------------------------------------------------------!
@@ -117,9 +130,10 @@ do kyr = 1, nyr
     call grow_up
     !------------------------------------------------------------------!
   end do ! it
-  write (*,'(i5,8f12.4)') kyr, rb, 1.0e3*(rb-rb0), ht, dp, sla * Mfol / CPA, sfra * Mfro / CPA, Su / Mtot, Rtot / Cup
-  write (20,'(i5,8f12.4)') kyr,rb,1.0e3*(rb-rb0),ht,dp,sla*Mfol/CPA, &
-                           sfra*Mfro/CPA,Su/Mtot,Rtot/Cup
+  write (*,'(i5,9f12.4)') kyr, rb, 1.0e3*(rb-rb0), ht, dp, sla * Mfol / CPA, sfra * Mfro / CPA, Su / Mtot_nhw, St / Mtot_nhw, Rtot / Cup
+  write (20,'(i5,9f12.4)') kyr,rb,1.0e3*(rb-rb0),ht,dp,sla*Mfol/CPA, &
+                           sfra*Mfro/CPA,Su/Mtot_nhw,St/Mtot_nhw,&
+			   Rtot/Cup
   !write (*,*) Ma,rho_wood*(pi/3.0)*ht*(rb**2)*Chia, 1.0e3*(rb-rb0)
   !write (*,*) Mb,rho_wood*(pi/3.0)*dp*(rb**2)*Chib,ht,dp
 end do ! kyr

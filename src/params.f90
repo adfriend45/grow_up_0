@@ -110,9 +110,13 @@ real, parameter :: sfra = sla
 !----------------------------------------------------------------------!
 real, parameter :: KSu = 0.0288
 !----------------------------------------------------------------------!
-! Hill coefficient (-)
+! Hill sucrose coefficient                                           (-)
 !----------------------------------------------------------------------!
-integer, parameter :: n_Hill = 4
+integer, parameter :: n_Hill_Su = 4
+!----------------------------------------------------------------------!
+! Hill starch coefficient                                            (-)
+!----------------------------------------------------------------------!
+integer, parameter :: n_Hill_St = 4
 !----------------------------------------------------------------------!
 ! Maximum starch concentration                           (g[Su] g[DM]-1)
 ! From Herrera-Ramirez et al. (2021; https://doi.org/10.1111/nph.17239),
@@ -205,7 +209,7 @@ real, parameter :: Q10_R = 2.0
 real, parameter :: cphloem = 0.06
 !----------------------------------------------------------------------!
 ! Coefficient for starch synthesis                 (kg[St] kg[DM]-1 s-1)
-! Where from?
+! Where from? Notes on it, with range, but no source. Furze?
 !----------------------------------------------------------------------!
 real, parameter :: alpha_St = 2.3e-8
 !----------------------------------------------------------------------!
